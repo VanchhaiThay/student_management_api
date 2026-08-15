@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import student_api.model.User;
+import student_api.util.JwtUtil;
+import java.util.Optional;
+import java.util.Map;
 import student_api.repository.UserRepository;
 
 @RestController
@@ -18,6 +21,9 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody User user) {
@@ -36,5 +42,25 @@ public class UserController {
         
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<?> signIn(@RequestBody Map<String, String> loginData) {
+        String email = loginData.get("email");
+        String password = loginData.get("password");
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                String token = jwtUtil.generateToken(email);
+                user.setToken(token);
+                userRepository.save(user);
+                return ResponseEntity.ok(user);
+            }
+        }
+        
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
     }
 }
