@@ -1,6 +1,7 @@
 package student_api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,16 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already registered.");
+        }
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Phone number is already registered.");
+        }
+        if (userRepository.existsByTeacherId(user.getTeacherId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Teacher ID is already registered.");
+        }
+
         // Hash the password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         
