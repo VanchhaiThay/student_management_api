@@ -14,7 +14,7 @@ public class JwtUtil {
     // In production, this should be in application.properties and loaded via @Value
     private static final String SECRET = "mySecretKeyForStudentManagementAppVerySecure1234567890";
     private static final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
-    private static final long EXPIRATION_TIME = 86400000; // 24 hours
+    private static final long EXPIRATION_TIME = 259200000; // 3 days
 
     public String generateToken(String email) {
         return Jwts.builder()
